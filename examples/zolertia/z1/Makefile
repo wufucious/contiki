@@ -7,8 +7,12 @@ ZOLERTIA_Z1SP=0
 
 CONTIKI_PROJECT = test-phidgets blink test-adxl345 test-tmp102 test-light-ziglet
 CONTIKI_PROJECT += test-battery test-relay-phidget test-tlc59116 test-sht25
+
+#add by wufucious
+CONTIKI_PROJECT += test-led test-button test-timer test-practise1
+
 CONTIKI_SOURCEFILES += sht11.c reed-sensor.c
-APPS=serial-shell
+APPS=serial-shell serial-ubidots
 
 ifeq ($(ZOLERTIA_Z1SP),1)
 CONTIKI_PROJECT += test-potent

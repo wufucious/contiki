@@ -41,27 +41,34 @@
 #include "contiki.h"
 #include "dev/i2cmaster.h"
 #include "dev/tmp102.h"
+#include "serial-ubidots.h"
 /*---------------------------------------------------------------------------*/
-#define TMP102_READ_INTERVAL (CLOCK_SECOND / 2)
+#define TMP102_READ_INTERVAL (CLOCK_SECOND/2)
 /*---------------------------------------------------------------------------*/
 PROCESS(temp_process, "Test Temperature process");
 AUTOSTART_PROCESSES(&temp_process);
 /*---------------------------------------------------------------------------*/
 static struct etimer et;
+static const char api_key[] = "72ea949aba5740782ecbf3a895d61392e8df5874";
+static const char var_key[] = "568a5dbb76254236928df80a";
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(temp_process, ev, data)
 {
   PROCESS_BEGIN();
 
-  int16_t temp;
+//  int16_t temp;
+  uint16_t raw;
 
   tmp102_init();
 
   while(1) {
     etimer_set(&et, TMP102_READ_INTERVAL);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    temp = tmp102_read_temp_x100();
-    printf("Temp = %d\n", temp);
+    // temp = tmp102_read_temp_x100();
+    // printf("Temp = %d\n", temp);
+    PRINTFDEBUG("Reading Temp...\n");    
+    raw = tmp102_read_temp_x100();
+    send_to_ubidots(api_key,var_key,&raw);
   }
   PROCESS_END();
 }
