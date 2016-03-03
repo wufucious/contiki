@@ -116,7 +116,12 @@ main(int argc, char **argv)
           } else if(strcmp(&argv[index][2], "115200") == 0) {
             speed = B115200;
             speedname = "115200";
-          } else {
+          }
+	else if(strcmp(&argv[index][2], "2000000") == 0) {
+            speed = B2000000;
+            speedname = "2000000";
+          } 
+	  else {
             fprintf(stderr, "unsupported speed: %s\n", &argv[index][2]);
             return usage(1);
           }
