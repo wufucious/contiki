@@ -1,2 +1,4 @@
-ccn-lite_src =
+APPS += ccn-lite/ccn-lite/src
+
+ccn-lite_src = ccn-lite-contiki.c
 ccn-lite_dsc =
