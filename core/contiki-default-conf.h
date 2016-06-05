@@ -78,13 +78,6 @@
 #define NETSTACK_CONF_LLSEC nullsec_driver
 #endif /* NETSTACK_CONF_LLSEC */
 
-/* To avoid unnecessary complexity, we assume the common case of
-   a constant LoWPAN-wide IEEE 802.15.4 security level, which
-   can be specified by defining LLSEC802154_CONF_SECURITY_LEVEL. */
-#ifndef LLSEC802154_CONF_SECURITY_LEVEL
-#define LLSEC802154_CONF_SECURITY_LEVEL 0
-#endif /* LLSEC802154_CONF_SECURITY_LEVEL */
-
 /* NETSTACK_CONF_NETWORK specifies the network layer and can be either
    sicslowpan_driver, for IPv6 networking, or rime_driver, for the
    custom Rime network stack. */
@@ -146,6 +139,13 @@
    routing. */
 #ifndef UIP_CONF_IPV6_RPL
 #define UIP_CONF_IPV6_RPL 1
+#endif /* UIP_CONF_IPV6_RPL */
+
+/* If RPL is enabled also enable the RPL NBR Policy */
+#if UIP_CONF_IPV6_RPL
+#ifndef NBR_TABLE_FIND_REMOVABLE
+#define NBR_TABLE_FIND_REMOVABLE rpl_nbr_policy_find_removable
+#endif /* NBR_TABLE_FIND_REMOVABLE */
 #endif /* UIP_CONF_IPV6_RPL */
 
 /* UIP_CONF_MAX_ROUTES specifies the maximum number of routes that each
@@ -219,14 +219,6 @@
  * code (sicslowpan). They typically depend on the type of radio used
  * on the target platform, and are therefore platform-specific.
  */
-
-/* SICSLOWPAN_CONF_MAX_MAC_TRANSMISSIONS specifies how many times the
-   MAC layer should resend packets if no link-layer ACK was
-   received. This only makes sense with the csma_driver
-   NETSTACK_CONF_MAC. */
-#ifndef SICSLOWPAN_CONF_MAX_MAC_TRANSMISSIONS
-#define SICSLOWPAN_CONF_MAX_MAC_TRANSMISSIONS 4
-#endif /* SICSLOWPAN_CONF_MAX_MAC_TRANSMISSIONS */
 
 /* SICSLOWPAN_CONF_FRAG specifies if 6lowpan fragmentation should be
    used or not. Fragmentation is on by default. */

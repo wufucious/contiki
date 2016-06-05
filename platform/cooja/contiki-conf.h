@@ -168,9 +168,6 @@
 #define SICSLOWPAN_CONF_MAXAGE                  8
 #endif /* SICSLOWPAN_CONF_FRAG */
 #define SICSLOWPAN_CONF_MAX_ADDR_CONTEXTS       2
-#ifndef SICSLOWPAN_CONF_MAX_MAC_TRANSMISSIONS
-#define SICSLOWPAN_CONF_MAX_MAC_TRANSMISSIONS   8
-#endif /* SICSLOWPAN_CONF_MAX_MAC_TRANSMISSIONS */
 
 #endif /* NETSTACK_CONF_WITH_IPV6 */
 
@@ -201,7 +198,7 @@ typedef unsigned short uip_stats_t;
 #define CLOCK_CONF_SECOND 1000L
 typedef unsigned long clock_time_t;
 typedef unsigned long rtimer_clock_t;
-#define RTIMER_CLOCK_LT(a,b)     ((signed long)((a)-(b)) < 0)
+#define RTIMER_CLOCK_DIFF(a,b)     ((signed long)((a)-(b)))
 
 #define AODV_COMPLIANCE
 #define AODV_NUM_RT_ENTRIES 32

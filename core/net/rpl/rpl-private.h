@@ -90,6 +90,14 @@
 
 #define RPL_DAO_K_FLAG                   0x80 /* DAO ACK requested */
 #define RPL_DAO_D_FLAG                   0x40 /* DODAG ID present */
+
+#define RPL_DAO_ACK_UNCONDITIONAL_ACCEPT 0
+#define RPL_DAO_ACK_ACCEPT               1   /* 1 - 127 is OK but not good */
+#define RPL_DAO_ACK_UNABLE_TO_ACCEPT     128 /* >127 is fail */
+#define RPL_DAO_ACK_UNABLE_TO_ADD_ROUTE_AT_ROOT 255 /* root can not accept */
+
+#define RPL_DAO_ACK_TIMEOUT              -1
+
 /*---------------------------------------------------------------------------*/
 /* RPL IPv6 extension header option. */
 #define RPL_HDR_OPT_LEN			4
@@ -117,6 +125,18 @@
 #define RPL_NOPATH_REMOVAL_DELAY          60
 #endif /* RPL_CONF_NOPATH_REMOVAL_DELAY */
 
+#ifdef RPL_CONF_DAO_MAX_RETRANSMISSIONS
+#define RPL_DAO_MAX_RETRANSMISSIONS RPL_CONF_DAO_MAX_RETRANSMISSIONS
+#else
+#define RPL_DAO_MAX_RETRANSMISSIONS     5
+#endif /* RPL_CONF_DAO_MAX_RETRANSMISSIONS */
+
+#ifdef RPL_CONF_DAO_RETRANSMISSION_TIMEOUT
+#define RPL_DAO_RETRANSMISSION_TIMEOUT RPL_CONF_DAO_RETRANSMISSION_TIMEOUT
+#else
+#define RPL_DAO_RETRANSMISSION_TIMEOUT  (5 * CLOCK_SECOND)
+#endif /* RPL_CONF_DAO_RETRANSMISSION_TIMEOUT */
+
 /* Special value indicating immediate removal. */
 #define RPL_ZERO_LIFETIME               0
 
@@ -124,11 +144,28 @@
           ((unsigned long)(instance)->lifetime_unit * (lifetime))
 
 #ifndef RPL_CONF_MIN_HOPRANKINC
+/* RFC6550 defines the default MIN_HOPRANKINC as 256.
+ * However, we use MRHOF as a default Objective Function (RFC6719),
+ * which recommends setting MIN_HOPRANKINC with care, in particular
+ * when used with ETX as a metric. ETX is computed as a fixed point
+ * real with a divisor of 128 (RFC6719, RFC6551). We choose to also
+ * use 128 for RPL_MIN_HOPRANKINC, resulting in a rank equal to the
+ * ETX path cost. Larger values may also be desirable, as discussed
+ * in section 6.1 of RFC6719. */
+#if RPL_OF_OCP == RPL_OCP_MRHOF
+#define RPL_MIN_HOPRANKINC          128
+#else /* RPL_OF_OCP == RPL_OCP_MRHOF */
 #define RPL_MIN_HOPRANKINC          256
-#else
+#endif /* RPL_OF_OCP == RPL_OCP_MRHOF */
+#else /* RPL_CONF_MIN_HOPRANKINC */
 #define RPL_MIN_HOPRANKINC          RPL_CONF_MIN_HOPRANKINC
-#endif
+#endif /* RPL_CONF_MIN_HOPRANKINC */
+
+#ifndef RPL_CONF_MAX_RANKINC
 #define RPL_MAX_RANKINC             (7 * RPL_MIN_HOPRANKINC)
+#else /* RPL_CONF_MAX_RANKINC */
+#define RPL_MAX_RANKINC             RPL_CONF_MAX_RANKINC
+#endif /* RPL_CONF_MAX_RANKINC */
 
 #define DAG_RANK(fixpt_rank, instance) \
   ((fixpt_rank) / (instance)->min_hoprankinc)
@@ -178,13 +215,6 @@
 #else
 #define RPL_MCAST_LIFETIME 3
 #endif
-
-/*
- * The ETX in the metric container is expressed as a fixed-point value 
- * whose integer part can be obtained by dividing the value by 
- * RPL_DAG_MC_ETX_DIVISOR.
- */
-#define RPL_DAG_MC_ETX_DIVISOR		256
 
 /* DIS related */
 #define RPL_DIS_SEND                    1
@@ -250,6 +280,8 @@ typedef struct rpl_stats rpl_stats_t;
 
 extern rpl_stats_t rpl_stats;
 #endif
+
+
 /*---------------------------------------------------------------------------*/
 /* RPL macros. */
 
@@ -268,8 +300,10 @@ void dis_output(uip_ipaddr_t *addr);
 void dio_output(rpl_instance_t *, uip_ipaddr_t *uc_addr);
 void dao_output(rpl_parent_t *, uint8_t lifetime);
 void dao_output_target(rpl_parent_t *, uip_ipaddr_t *, uint8_t lifetime);
-void dao_ack_output(rpl_instance_t *, uip_ipaddr_t *, uint8_t);
+void dao_ack_output(rpl_instance_t *, uip_ipaddr_t *, uint8_t, uint8_t);
 void rpl_icmp6_register_handlers(void);
+uip_ds6_nbr_t *rpl_icmp6_update_nbr_table(uip_ipaddr_t *from,
+                                          nbr_table_reason_t r, void *data);
 
 /* RPL logic functions. */
 void rpl_join_dag(uip_ipaddr_t *from, rpl_dio_t *dio);
