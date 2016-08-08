@@ -7,3 +7,5 @@ BOARD_SOURCEFILES += ext-flash.c board-spi.c
 
 ### Signal that we can be programmed with cc2538-bsl
 BOARD_SUPPORTS_BSL=1
+
+BSL_FLAGS += -e -w -v -b 115200 PORT=/dev/ttyACM0
