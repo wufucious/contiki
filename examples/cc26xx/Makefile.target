@@ -1,1 +1,3 @@
 TARGET = srf06-cc26xx
+BOARD  = launchpad/cc2650
+#BOARD  = sensortag/cc2650
