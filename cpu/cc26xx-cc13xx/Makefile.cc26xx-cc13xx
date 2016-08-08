@@ -32,7 +32,7 @@ LDSCRIPT = $(CONTIKI_CPU)/cc26xx.ld
 CFLAGS += -mcpu=cortex-m3 -mthumb -mlittle-endian
 CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -fshort-enums -fomit-frame-pointer -fno-strict-aliasing
-CFLAGS += -Wall -std=c99
+CFLAGS += -Wall -std=c99 -g
 
 LDFLAGS += -mcpu=cortex-m3 -mthumb -mlittle-endian -nostartfiles
 LDFLAGS += -T $(LDSCRIPT)
@@ -47,9 +47,9 @@ endif
 
 ### Are we building with code size optimisations?
 ifeq ($(SMALL),1)
-  CFLAGS += -Os
+#  CFLAGS += -Os
 else
-  CFLAGS += -O2
+#  CFLAGS += -O2
 endif
 
 ### If the user-specified a Node ID, pass a define

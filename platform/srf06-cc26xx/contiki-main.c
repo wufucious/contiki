@@ -150,7 +150,7 @@ main(void)
   /* Set the LF XOSC as the LF system clock source */
   oscillators_select_lf_xosc();
 
-  lpm_init();
+//  lpm_init();
 
   board_init();
 
@@ -174,7 +174,7 @@ main(void)
   clock_init();
   rtimer_init();
 
-  watchdog_init();
+//  watchdog_init();
   process_init();
 
   random_init(0x1234);
@@ -228,7 +228,7 @@ main(void)
 
   autostart_start(autostart_processes);
 
-  watchdog_start();
+//  watchdog_start();
 
   fade(LEDS_ORANGE);
 
@@ -236,11 +236,11 @@ main(void)
     uint8_t r;
     do {
       r = process_run();
-      watchdog_periodic();
+//      watchdog_periodic();
     } while(r > 0);
 
     /* Drop to some low power mode */
-    lpm_drop();
+//    lpm_drop();
   }
 }
 /*---------------------------------------------------------------------------*/
