@@ -39,5 +39,8 @@
 #define RF_CORE_CONF_CHANNEL                 26
 #define RF_BLE_CONF_ENABLED                   1
 /*---------------------------------------------------------------------------*/
+/* Change to match 6lbr's 6lowpan context */
+#define UIP_CONF_DS6_DEFAULT_PREFIX 0xaaaa
+/*---------------------------------------------------------------------------*/
 #endif /* PROJECT_CONF_H_ */
 /*---------------------------------------------------------------------------*/
