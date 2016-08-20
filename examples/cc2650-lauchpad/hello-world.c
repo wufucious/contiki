@@ -38,6 +38,7 @@
  */
 
 #include "contiki.h"
+//#include "ccn-lite-contiki.h"
 
 #include <stdio.h> /* For printf() */
 /*---------------------------------------------------------------------------*/
