@@ -34,7 +34,7 @@ CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -fshort-enums -fomit-frame-pointer -fno-strict-aliasing
 CFLAGS += -Wall -std=c99 -g
 
-LDFLAGS += -mcpu=cortex-m3 -mthumb -mlittle-endian -nostartfiles ##--specs=nosys.specs
+LDFLAGS += -mcpu=cortex-m3 -mthumb -mlittle-endian -nostartfiles -specs=nosys.specs
 LDFLAGS += -T $(LDSCRIPT)
 LDFLAGS += -Wl,--gc-sections,--sort-section=alignment
 LDFLAGS += -Wl,-Map=$(@:.elf=-$(TARGET).map),--cref,--no-warn-mismatch

@@ -99,11 +99,15 @@ SECTIONS
     ._user_heap_stack :
     {
       . = ALIGN(4);
+      _end = .;
       . = . + _Min_Heap_Size;
       . = . + _Min_Stack_Size;
       . = ALIGN(4);
     } > SRAM
     
+    /* Provide symbol for newlib _sbrk() if default syscalls are used */
+  	PROVIDE(end = _end);
+
     .gpram :
     { 
     } > GPRAM
