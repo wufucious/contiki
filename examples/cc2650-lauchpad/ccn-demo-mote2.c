@@ -57,7 +57,7 @@ static struct uip_udp_conn *client_conn;
 //#define CCNL_MAKE_INTEREST
 #define CCNL_TRANS
 
-#define CPU_TEMP
+//#define CPU_TEMP
 #ifdef CPU_TEMP
 #include "lib/sensors.h"
 #include "dev/adc-sensors.h"

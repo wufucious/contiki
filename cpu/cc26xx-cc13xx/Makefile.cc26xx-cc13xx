@@ -32,9 +32,9 @@ LDSCRIPT = $(CONTIKI_CPU)/cc26xx.ld
 CFLAGS += -mcpu=cortex-m3 -mthumb -mlittle-endian
 CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -fshort-enums -fomit-frame-pointer -fno-strict-aliasing
-CFLAGS += -Wall -std=c99 -g
+CFLAGS += -Wall -std=c99 -g#-specs=nano.specs
 
-LDFLAGS += -mcpu=cortex-m3 -mthumb -mlittle-endian -nostartfiles -specs=nosys.specs
+LDFLAGS += -mcpu=cortex-m3 -mthumb -mlittle-endian -nostartfiles -specs=nosys.specs #-specs=nano.specs
 LDFLAGS += -T $(LDSCRIPT)
 LDFLAGS += -Wl,--gc-sections,--sort-section=alignment
 LDFLAGS += -Wl,-Map=$(@:.elf=-$(TARGET).map),--cref,--no-warn-mismatch
@@ -47,9 +47,9 @@ endif
 
 ### Are we building with code size optimisations?
 ifeq ($(SMALL),1)
-#  CFLAGS += -Os
+  CFLAGS += -Os
 else
-#  CFLAGS += -O2
+  CFLAGS += -O2
 endif
 
 ### If the user-specified a Node ID, pass a define
@@ -107,7 +107,8 @@ CUSTOM_RULE_LINK=1
 %.elf: $(TARGET_STARTFILES) %.co $(PROJECT_OBJECTFILES) $(PROJECT_LIBRARIES) contiki-$(TARGET).a $(LDSCRIPT)
 	$(TRACE_LD)
 	$(Q)$(LD) $(LDFLAGS) ${filter-out $(LDSCRIPT) %.a,$^} ${filter %.a,$^} $(TARGET_LIBFILES) -lm -o $@
-
+	$(SIZE) $@
+	
 %.i16hex: %.elf
 	$(OBJCOPY) -O ihex $< $@
 
