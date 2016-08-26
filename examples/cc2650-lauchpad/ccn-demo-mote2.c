@@ -44,7 +44,7 @@
 
 #include "ccn-lite-contiki.h"
 
-#define SEND_INTERVAL		10 * CLOCK_SECOND//5 * CLOCK_SECOND
+#define SEND_INTERVAL		5 * CLOCK_SECOND//5 * CLOCK_SECOND
 #define MAX_PAYLOAD_LEN		40
 
 static struct uip_udp_conn *client_conn;
@@ -400,6 +400,7 @@ PROCESS_THREAD(ccn_client_process, ev, data)
 	UIP_HTONS(client_conn->lport), UIP_HTONS(client_conn->rport));
 
 //  ccnl_generation();
+  ccnl_init();
 
   etimer_set(&et, SEND_INTERVAL);
   while(1) {
