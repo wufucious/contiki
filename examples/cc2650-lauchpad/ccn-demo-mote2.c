@@ -220,7 +220,7 @@ static void
 ccnl_generation(void)
 {
   static int seq_id;
-  if(seq_id == 5) seq_id=0;//TODO: debug_level=0 and seq_id=1003 will be freea bug
+  if(seq_id == 4) seq_id=0;//TODO: debug_level=0 and seq_id=1003 will be freea bug
 
   printf("mote2 generate new content: ");
 //  PRINT6ADDR(&client_conn->ripaddr);
