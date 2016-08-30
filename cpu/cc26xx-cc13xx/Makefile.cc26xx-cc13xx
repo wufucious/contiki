@@ -46,10 +46,12 @@ CFLAGS += -Werror
 endif
 
 ### Are we building with code size optimisations?
+ifeq ($(DEBUG),0)
 ifeq ($(SMALL),1)
   CFLAGS += -Os
 else
   CFLAGS += -O2
+endif
 endif
 
 ### If the user-specified a Node ID, pass a define

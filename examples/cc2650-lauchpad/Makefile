@@ -8,6 +8,7 @@ CONTIKI_WITH_RIME = 1
 
 V=1
 SMALL =0
+DEBUG =1
 
 APPS += ccn-lite my_heapmem
 
