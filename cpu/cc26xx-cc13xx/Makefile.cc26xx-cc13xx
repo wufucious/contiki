@@ -32,9 +32,9 @@ LDSCRIPT = $(CONTIKI_CPU)/cc26xx.ld
 CFLAGS += -mcpu=cortex-m3 -mthumb -mlittle-endian
 CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -fshort-enums -fomit-frame-pointer -fno-strict-aliasing
-CFLAGS += -Wall -std=c99 -g#-specs=nano.specs
+CFLAGS += -Wall -std=c99 -g -specs=nano.specs
 
-LDFLAGS += -mcpu=cortex-m3 -mthumb -mlittle-endian -nostartfiles -specs=nosys.specs #-specs=nano.specs
+LDFLAGS += -mcpu=cortex-m3 -mthumb -mlittle-endian -nostartfiles -specs=nosys.specs -specs=nano.specs
 LDFLAGS += -T $(LDSCRIPT)
 LDFLAGS += -Wl,--gc-sections,--sort-section=alignment
 LDFLAGS += -Wl,-Map=$(@:.elf=-$(TARGET).map),--cref,--no-warn-mismatch
