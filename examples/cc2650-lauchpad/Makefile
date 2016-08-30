@@ -9,7 +9,7 @@ CONTIKI_WITH_RIME = 1
 V=1
 SMALL =0
 
-APPS += ccn-lite
+APPS += ccn-lite my_heapmem
 
 CONTIKI = ../..
 include $(CONTIKI)/Makefile.include
