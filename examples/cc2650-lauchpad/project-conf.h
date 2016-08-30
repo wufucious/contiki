@@ -43,5 +43,7 @@
 #define STARTUP_CONF_VERBOSE        0 /**< Set to 0 to decrease startup verbosity */
 #endif
 /*---------------------------------------------------------------------------*/
+#define HEAPMEM_CONF_ARENA_SIZE 5000//for heapmem from nicolas
+/*---------------------------------------------------------------------------*/
 #endif /* PROJECT_CONF_H_ */
 /*---------------------------------------------------------------------------*/
