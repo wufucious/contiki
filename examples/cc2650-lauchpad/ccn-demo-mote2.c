@@ -256,8 +256,11 @@ ccnl_generation(void)
   	offs = ccnl_make_content(suite, buf, content, NULL,_int_buf, &len);
   	if(offs == -1){
   		printf("failed to make content!\n");
+  	}else
+  	{
+  		printf("content generated!\n");
   	}
-  	data = _int_buf + offs;
+//  	data = _int_buf + offs;
 
 //  	uip_udp_packet_send(client_conn, data, len);
 #endif
