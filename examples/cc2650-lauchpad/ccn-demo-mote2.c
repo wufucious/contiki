@@ -44,7 +44,7 @@
 
 #include "ccn-lite-contiki.h"
 
-#define SEND_INTERVAL		5 * CLOCK_SECOND//5 * CLOCK_SECOND
+#define GENERATE_INTERVAL		10 * CLOCK_SECOND//5 * CLOCK_SECOND
 #define MAX_PAYLOAD_LEN		40
 
 static struct uip_udp_conn *client_conn;
@@ -220,7 +220,7 @@ static void
 ccnl_generation(void)
 {
   static int seq_id;
-  if(seq_id == 4) seq_id=0;//TODO: debug_level=0 and seq_id=1003 will be freea bug
+  if(seq_id == SEQ_ID_MAX) seq_id=0;//TODO: debug_level=0 and seq_id=1003 will be freea bug
 
   printf("mote2 generate new content: ");
 //  PRINT6ADDR(&client_conn->ripaddr);
@@ -405,7 +405,7 @@ PROCESS_THREAD(ccn_client_process, ev, data)
 //  ccnl_generation();
   ccnl_init();
 
-  etimer_set(&et, SEND_INTERVAL);
+  etimer_set(&et, GENERATE_INTERVAL);
   while(1) {
     PROCESS_YIELD();
     if(etimer_expired(&et)) {
