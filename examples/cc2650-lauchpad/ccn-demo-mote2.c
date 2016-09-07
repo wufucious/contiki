@@ -30,7 +30,6 @@
 #include "contiki.h"
 #include "contiki-lib.h"
 #include "contiki-net.h"
-#include "net/ip/resolv.h"
 
 #include <string.h>
 #include <stdbool.h>
@@ -45,127 +44,21 @@
 #include "ccn-lite-contiki.h"
 
 #define GENERATE_INTERVAL		10 * CLOCK_SECOND//5 * CLOCK_SECOND
-#define MAX_PAYLOAD_LEN		40
+#define MAX_PREFIX_SIZE		40
+#define CCN_BUF_SIZE    (128)
+
+static char prefix_buf[MAX_PREFIX_SIZE];
+static unsigned char ccn_content_buf[CCN_BUF_SIZE];
+
 
 static struct uip_udp_conn *client_conn;
 
-#define PRE_TRY_CONNCETION 0
-#define ENABLE_CCNL
-
-//#define CFS_DEBUG
-
-//#define CCNL_MAKE_INTEREST
-#define CCNL_TRANS
-
-//#define CPU_TEMP
-#ifdef CPU_TEMP
-#include "lib/sensors.h"
-#include "dev/adc-sensors.h"
-#include "dev/cpu-temp-sensor.h"
-#include "adc.h"
-
-const struct sensors_sensor cputemp_sensor;
-
-static int active;
-static int last_mv_value, last_celsius_value;
-
-static int value(int type)
-{
-  int value;
-  /*NOTE: "type" could refine the output to
-   * RAW digital value or some physical unit (lux, etc) */
-
-  switch(type){
-
-    case CPUTEMPSENSOR_MV:
-      value = adc_measure_channel(ADC_CHANNEL_INTERNAL_TEMP);
-      last_mv_value = value;
-      break;
-
-    case CPUTEMPSENSOR_CELSIUS:
-      value = adc_measure_int_temp();
-      last_celsius_value = value;
-      break;
-
-    case CPUTEMPSENSOR_MV_LAST:
-      value = last_mv_value;
-      break;
-
-    case CPUTEMPSENSOR_CELSIUS_LAST:
-      value = last_celsius_value;
-      break;
-
-    default:
-      value = adc_measure_int_temp();
-      break;
-  }
-
-  return value;
-}
-
 /*---------------------------------------------------------------------------*/
-
-static int status(int type)
-{
-  return active;
-}
-
+PROCESS(ccn_client_process, "ccn client mote2 process");
+AUTOSTART_PROCESSES(&ccn_client_process);
 /*---------------------------------------------------------------------------*/
-
-static int configure(int type, int c)
-{
-  switch (type) {
-
-    case SENSORS_HW_INIT:
-      /* init ADC */
-      adc_sensors_init();
-
-      active = c;
-      if(active){
-        ;
-      }
-      else{
-        /* Power OFF the sensors for now - better power management !?? */
-        ;
-      }
-      break;
-
-    case SENSORS_ACTIVE:
-      active  = c;
-      if (active)
-        ;
-      else
-        ;
-      break;
-
-    case SENSORS_READY:
-      return active;  // return value
-      break;
-
-    default:
-      return 1;  // error
-  }
-  return 0;
-}
-
-/*---------------------------------------------------------------------------*/
-
-SENSORS_SENSOR(cputemp_sensor, "Internal Temperature", value, configure, status);
-
-/*---------------------------------------------------------------------------*/
-/* Light Polling Process for generating events in case a threshold is exceeded */
-#define ABS(x) (x < 0 ? -x : x)
-
-#endif
-
-/*---------------------------------------------------------------------------*/
-PROCESS(ccn_client_process, "ccn client process");
-AUTOSTART_PROCESSES(&resolv_process,&ccn_client_process);
-/*---------------------------------------------------------------------------*/
-#ifdef CCNL_TRANS
 #define TRANS_BUF_SIZE 150
 static char buf_trans[TRANS_BUF_SIZE];
-#endif
 
 static void
 tcpip_handler(void)
@@ -176,8 +69,6 @@ tcpip_handler(void)
   if(uip_newdata()) {
     str = uip_appdata;
     str[uip_datalen()] = '\0';
-//    printf("Response from the mote1: '%s'\n", str);
-#ifdef CCNL_TRANS
     printf("Got interests from the mote1: '%s'\n trying to translate that \n", str);
     int suite = CCNL_SUITE_NDNTLV;
 //    int suite = CCNL_SUITE_CCNTLV;
@@ -194,101 +85,38 @@ tcpip_handler(void)
       	memset(&client_conn->ripaddr, 0, sizeof(client_conn->ripaddr));
       	client_conn->rport=0;
     }
-#endif
   }
 }
 /*---------------------------------------------------------------------------*/
-#ifdef ENABLE_CCNL
-#ifdef CCNL_MAKE_INTEREST
-#define BUF_SIZE    (108)
-#else
-#define BUF_SIZE    (128)
-#endif
-static unsigned char _int_buf[BUF_SIZE];
-#endif
-
-#ifdef CFS_DEBUG
-#include "cfs/cfs.h"
-static char *filename = "msg_file";
-static int fd_write;
-static int n;
-#endif
-
-static char buf[MAX_PAYLOAD_LEN];
-
 static void
 ccnl_generation(void)
 {
   static int seq_id;
-  if(seq_id == SEQ_ID_MAX) seq_id=0;//TODO: debug_level=0 and seq_id=1003 will be freea bug
+  if(seq_id == SEQ_ID_MAX) seq_id=0;
 
-  printf("mote2 generate new content: ");
-//  PRINT6ADDR(&client_conn->ripaddr);
-//  sprintf(buf, "Hello %d from the client", ++seq_id);
-  sprintf(buf, "kista/kth/sics/alice/%d", ++seq_id);
-  printf(" (msg: %s)\n", buf);
-#if SEND_TOO_LARGE_PACKET_TO_TEST_FRAGMENTATION
-    uip_udp_packet_send(client_conn, buf, UIP_APPDATA_SIZE);
-#else /* SEND_TOO_LARGE_PACKET_TO_TEST_FRAGMENTATION */
-#ifdef ENABLE_CCNL
-    int suite = CCNL_SUITE_NDNTLV;
-//    int suite = CCNL_SUITE_CCNTLV;
-    int len, offs;
-    unsigned char *data;
-    memset(_int_buf, '\0', BUF_SIZE);
-#ifdef CCNL_MAKE_INTEREST
-    offs = ccnl_make_interest(suite, buf, NULL,_int_buf, BUF_SIZE, &len);
-  	if(offs == -1){
-  		printf("failed to make interest!\n");
-  	}
-  	uip_udp_packet_send(client_conn, _int_buf, strlen(_int_buf));
-#else
-#ifdef CPU_TEMP
-    SENSORS_ACTIVATE(cputemp_sensor);
-    int temp = cputemp_sensor.value(CPUTEMPSENSOR_MV);
-    SENSORS_DEACTIVATE(cputemp_sensor);
-    char content[5];
-    sprintf(content,"%d",temp);
-    content[4]="\0";
-#else
-  	char* content="5635\0";
-#endif
-  	offs = ccnl_make_content(suite, buf, content, NULL,_int_buf, &len);
-  	if(offs == -1){
-  		printf("failed to make content!\n");
-  	}else
-  	{
-  		printf("content generated!\n");
-  	}
-//  	data = _int_buf + offs;
+  printf("mote2 generating new content: ");
+  sprintf(prefix_buf, "kista/kth/sics/alice/%d", ++seq_id);
+  printf(" (msg: %s)\n", prefix_buf);
 
-//  	uip_udp_packet_send(client_conn, data, len);
-#endif
+  int suite = CCNL_SUITE_NDNTLV;
+//  int suite = CCNL_SUITE_CCNTLV;
+  int len, offs;
+  unsigned char *data;
 
-#ifdef CFS_DEBUG
-    fd_write = cfs_open(filename, CFS_WRITE | CFS_APPEND);
-    if(fd_write != -1) {
-      n = cfs_write(fd_write, data, len);
-      cfs_close(fd_write);
-      printf("successfully appended data to cfs. wrote %i bytes  \n",n);
-    } else {
-      printf("ERROR: could not write to memory.\n");
-    }
-#endif
-#else
-  	uip_udp_packet_send(client_conn, buf, strlen(buf));
-#ifdef CFS_DEBUG
-    fd_write = cfs_open(filename, CFS_WRITE | CFS_APPEND);
-    if(fd_write != -1) {
-      n = cfs_write(fd_write, buf, sizeof(buf));
-      cfs_close(fd_write);
-      printf("successfully appended data to cfs. wrote %i bytes  \n",n);
-    } else {
-      printf("ERROR: could not write to memory.\n");
-    }
-#endif
-	#endif
-#endif /* SEND_TOO_LARGE_PACKET_TO_TEST_FRAGMENTATION */
+  memset(ccn_content_buf, '\0', CCN_BUF_SIZE);
+  char* content="5635\0";
+
+  offs = ccnl_make_content(suite, prefix_buf, content, NULL,ccn_content_buf, &len);
+
+  if(offs == -1){
+  	printf("failed to make content!\n");
+  }else
+  {
+  	printf("content generated!\n");
+  }
+
+  //data = ccn_content_buf + offs;
+  //uip_udp_packet_send(client_conn, data, len);
 }
 /*---------------------------------------------------------------------------*/
 static void
@@ -320,49 +148,6 @@ set_global_address(void)
 }
 #endif /* UIP_CONF_ROUTER */
 /*---------------------------------------------------------------------------*/
-#if PRE_TRY_CONNCETION
-static resolv_status_t
-set_connection_address(uip_ipaddr_t *ipaddr)
-{
-#ifndef UDP_CONNECTION_ADDR
-#if RESOLV_CONF_SUPPORTS_MDNS
-#define UDP_CONNECTION_ADDR       contiki-udp-server.local
-#elif UIP_CONF_ROUTER
-#define UDP_CONNECTION_ADDR       aaaa:0:0:0:d28c:7bff:fe15:11
-#else
-#define UDP_CONNECTION_ADDR       fe80:0:0:0:6466:6666:6666:6666
-#endif
-#endif /* !UDP_CONNECTION_ADDR */
-
-#define _QUOTEME(x) #x
-#define QUOTEME(x) _QUOTEME(x)
-
-  resolv_status_t status = RESOLV_STATUS_ERROR;
-
-  if(uiplib_ipaddrconv(QUOTEME(UDP_CONNECTION_ADDR), ipaddr) == 0) {
-    uip_ipaddr_t *resolved_addr = NULL;
-    status = resolv_lookup(QUOTEME(UDP_CONNECTION_ADDR),&resolved_addr);
-    if(status == RESOLV_STATUS_UNCACHED || status == RESOLV_STATUS_EXPIRED) {
-      PRINTF("Attempting to look up %s\n",QUOTEME(UDP_CONNECTION_ADDR));
-      resolv_query(QUOTEME(UDP_CONNECTION_ADDR));
-      status = RESOLV_STATUS_RESOLVING;
-    } else if(status == RESOLV_STATUS_CACHED && resolved_addr != NULL) {
-      PRINTF("Lookup of \"%s\" succeded!\n",QUOTEME(UDP_CONNECTION_ADDR));
-    } else if(status == RESOLV_STATUS_RESOLVING) {
-      PRINTF("Still looking up \"%s\"...\n",QUOTEME(UDP_CONNECTION_ADDR));
-    } else {
-      PRINTF("Lookup of \"%s\" failed. status = %d\n",QUOTEME(UDP_CONNECTION_ADDR),status);
-    }
-    if(resolved_addr)
-      uip_ipaddr_copy(ipaddr, resolved_addr);
-  } else {
-    status = RESOLV_STATUS_CACHED;
-  }
-
-  return status;
-}
-#endif
-/*---------------------------------------------------------------------------*/
 PROCESS_THREAD(ccn_client_process, ev, data)
 {
   static struct etimer et;
@@ -376,43 +161,23 @@ PROCESS_THREAD(ccn_client_process, ev, data)
 #endif
 
   print_local_addresses();
-#if PRE_TRY_CONNCETION
-  static resolv_status_t status = RESOLV_STATUS_UNCACHED;
-  while(status != RESOLV_STATUS_CACHED) {
-    status = set_connection_address(&ipaddr);
 
-    if(status == RESOLV_STATUS_RESOLVING) {
-      PROCESS_WAIT_EVENT_UNTIL(ev == resolv_event_found);
-    } else if(status != RESOLV_STATUS_CACHED) {
-      PRINTF("Can't get connection address.\n");
-      PROCESS_YIELD();
-    }ccnl_generation
-  }
-#else
-  static char *server="aaaa::d200:0:0:1000";
-  uiplib_ipaddrconv(server, &ipaddr);
-#endif
-  /* new connection with remote host */
-//  client_conn = udp_new(&ipaddr, UIP_HTONS(1000), NULL);
   client_conn = udp_new(NULL, UIP_HTONS(0), NULL);
   udp_bind(client_conn, UIP_HTONS(1001));
 
-  PRINTF("Created a connection with the server ");
+  PRINTF("Waiting for the Interest from IP address ");
   PRINT6ADDR(&client_conn->ripaddr);
   PRINTF(" local/remote port %u/%u\n",
 	UIP_HTONS(client_conn->lport), UIP_HTONS(client_conn->rport));
 
-//  ccnl_generation();
   ccnl_init();
 
   etimer_set(&et, GENERATE_INTERVAL);
   while(1) {
     PROCESS_YIELD();
     if(etimer_expired(&et)) {
-//      while(1){
-    	  ccnl_generation();
-//      }
-      etimer_restart(&et);
+    	ccnl_generation();
+    	etimer_restart(&et);
     } else if(ev == tcpip_event) {
       tcpip_handler();
     }
