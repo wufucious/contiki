@@ -172,7 +172,7 @@ set_global_address(void)
 {
   uip_ipaddr_t ipaddr;
 
-  uip_ip6addr(&ipaddr, 0xaaaa, 0, 0, 0, 0, 0, 0, 0);
+  uip_ip6addr(&ipaddr, 0xfd00, 0, 0, 0, 0, 0, 0, 0);
   uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
   uip_ds6_addr_add(&ipaddr, 0, ADDR_AUTOCONF);
 }
@@ -247,7 +247,7 @@ PROCESS_THREAD(ccn_client_process, ev, data)
     }
   }
 #else
-  static char *server="aaaa::212:4b00:aff:a880";
+  static char *server="fd00::212:4b00:aff:a880";
   uiplib_ipaddrconv(server, &ipaddr);
 #endif
   /* new connection with remote host */

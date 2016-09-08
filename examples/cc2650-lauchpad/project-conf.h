@@ -37,7 +37,7 @@
 //#define RF_BLE_CONF_ENABLED                   1
 /*---------------------------------------------------------------------------*/
 /* Change to match 6lbr's 6lowpan context */
-#define UIP_CONF_DS6_DEFAULT_PREFIX 0xaaaa
+//#define UIP_CONF_DS6_DEFAULT_PREFIX 0xaaaa
 /*---------------------------------------------------------------------------*/
 #ifndef STARTUP_CONF_VERBOSE
 #define STARTUP_CONF_VERBOSE        0 /**< Set to 0 to decrease startup verbosity */
