@@ -31,6 +31,8 @@
 #include "contiki-lib.h"
 #include "contiki-net.h"
 
+#include "leds.h"
+
 #include <string.h>
 #include <stdbool.h>
 
@@ -57,6 +59,25 @@ static struct uip_udp_conn *client_conn;
 PROCESS(ccn_client_process, "ccn client mote2 process");
 AUTOSTART_PROCESSES(&ccn_client_process);
 /*---------------------------------------------------------------------------*/
+static void
+fade(unsigned char l)
+{
+  volatile int i;
+  int k, j;
+  for(k = 0; k < 800; ++k) {
+    j = k > 400 ? 800 - k : k;
+
+    leds_on(l);
+    for(i = 0; i < j; ++i) {
+      __asm("nop");
+    }
+    leds_off(l);
+    for(i = 0; i < 400 - j; ++i) {
+      __asm("nop");
+    }
+  }
+}
+/*---------------------------------------------------------------------------*/
 #define TRANS_BUF_SIZE 150
 static char buf_trans[TRANS_BUF_SIZE];
 
@@ -76,6 +97,7 @@ tcpip_handler(void)
     int k = ccnl_find_content(suite, uip_appdata, uip_datalen(), buf_trans, &len);
     if(k == 0){
     	printf("sending out match content");
+    	fade(LEDS_GREEN);
 
     	uip_ipaddr_copy(&client_conn->ripaddr, &UIP_IP_BUF->srcipaddr);
     	client_conn->rport = UIP_IP_BUF->srcport;
@@ -113,6 +135,7 @@ ccnl_generation(void)
   }else
   {
   	printf("content generated!\n");
+  	fade(LEDS_RED);
   }
 
   //data = ccn_content_buf + offs;
@@ -151,7 +174,7 @@ set_global_address(void)
 PROCESS_THREAD(ccn_client_process, ev, data)
 {
   static struct etimer et;
-  uip_ipaddr_t ipaddr;
+//  uip_ipaddr_t ipaddr;
 
   PROCESS_BEGIN();
   PRINTF("ccn client process started\n");

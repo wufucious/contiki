@@ -32,6 +32,8 @@
 #include "contiki-net.h"
 #include "net/ip/resolv.h"
 
+#include "leds.h"
+
 #include <string.h>
 #include <stdbool.h>
 
@@ -58,6 +60,25 @@ PROCESS(ccn_client_process, "ccn client process");
 AUTOSTART_PROCESSES(&resolv_process,&ccn_client_process);
 /*---------------------------------------------------------------------------*/
 static void
+fade(unsigned char l)
+{
+  volatile int i;
+  int k, j;
+  for(k = 0; k < 800; ++k) {
+    j = k > 400 ? 800 - k : k;
+
+    leds_on(l);
+    for(i = 0; i < j; ++i) {
+      __asm("nop");
+    }
+    leds_off(l);
+    for(i = 0; i < 400 - j; ++i) {
+      __asm("nop");
+    }
+  }
+}
+/*---------------------------------------------------------------------------*/
+static void
 tcpip_handler(void)
 {
   char *str;
@@ -66,6 +87,7 @@ tcpip_handler(void)
     str = uip_appdata;
     str[uip_datalen()] = '\0';
     printf("Response from the mote2: '%s'\n", str);
+    fade(LEDS_YELLOW);
   }
 }
 /*---------------------------------------------------------------------------*/
@@ -110,8 +132,10 @@ ccnl_generation(void)
     offs = ccnl_make_interest(suite, buf, NULL,_int_buf, BUF_SIZE, &len);
   	if(offs == -1){
   		printf("failed to make interest!\n");
+  		return;
   	}
   	uip_udp_packet_send(client_conn, _int_buf, len/*strlen(_int_buf)*/);
+  	fade(LEDS_ORANGE);
 #else
     unsigned char *data;
   	char* content="5635\0";
