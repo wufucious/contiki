@@ -1,5 +1,5 @@
 DEFINES+=PROJECT_CONF_H=\"project-conf.h\"
-CONTIKI_PROJECT = hello-world ccn-demo-mote1 ccn-demo-mote2
+CONTIKI_PROJECT = hello-world ccn-demo-mote1 ccn-demo-mote2 ccn-demo-mote3
 
 all: $(CONTIKI_PROJECT)
 
