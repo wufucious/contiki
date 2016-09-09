@@ -50,5 +50,9 @@
 #define CCNL_MAX_CACHE_ENTRIES 6
 #define SEQ_ID_MAX 6
 /*---------------------------------------------------------------------------*/
+#define MOTE1_INTERVAL 0.5 * CLOCK_SECOND
+#define MOTE2_INTERVAL 5 * CLOCK_SECOND
+#define MOTE3_INTERVAL 3 * CLOCK_SECOND
+/*---------------------------------------------------------------------------*/
 #endif /* PROJECT_CONF_H_ */
 /*---------------------------------------------------------------------------*/

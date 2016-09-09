@@ -45,7 +45,7 @@
 
 #include "ccn-lite-contiki.h"
 
-#define GENERATE_INTERVAL		10 * CLOCK_SECOND//5 * CLOCK_SECOND
+#define GENERATE_INTERVAL		MOTE2_INTERVAL//5 * CLOCK_SECOND
 #define MAX_PREFIX_SIZE		40
 #define CCN_BUF_SIZE    (128)
 

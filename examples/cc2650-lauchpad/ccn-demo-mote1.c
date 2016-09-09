@@ -43,7 +43,7 @@
 
 #include "ccn-lite-contiki.h"
 
-#define SEND_INTERVAL		6 * CLOCK_SECOND//15 * CLOCK_SECOND
+#define SEND_INTERVAL		MOTE1_INTERVAL//15 * CLOCK_SECOND
 #define MAX_PAYLOAD_LEN		40
 
 static struct uip_udp_conn *client_conn;
@@ -113,7 +113,7 @@ static void
 ccnl_generation(void)
 {
   static int seq_id;
-  if(seq_id == 4) seq_id=0;
+  if(seq_id == SEQ_ID_MAX) seq_id=0;
 
   printf("mote1 sending to: ");
   PRINT6ADDR(&client_conn->ripaddr);
