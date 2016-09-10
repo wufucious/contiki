@@ -90,13 +90,13 @@ tcpip_handler(void)
   if(uip_newdata()) {
     str = uip_appdata;
     str[uip_datalen()] = '\0';
-    printf("Got interests from the mote1: '%s'\n trying to translate that \n", str);
+    PRINTF("Got interests from the mote1: '%s'\n trying to translate that \n", str);
     int suite = CCNL_SUITE_NDNTLV;
 //    int suite = CCNL_SUITE_CCNTLV;
     memset(buf_trans, '\0', TRANS_BUF_SIZE);
     int k = ccnl_find_content(suite, uip_appdata, uip_datalen(), buf_trans, &len);
     if(k == 0){
-    	printf("sending out match content");
+    	PRINTF("sending out match content");
     	fade(LEDS_GREEN);
 
     	uip_ipaddr_copy(&client_conn->ripaddr, &UIP_IP_BUF->srcipaddr);
@@ -116,9 +116,9 @@ ccnl_generation(void)
   static int seq_id;
   if(seq_id == SEQ_ID_MAX) seq_id=0;
 
-  printf("mote2 generating new content: ");
+  PRINTF("mote2 generating new content: ");
   sprintf(prefix_buf, "kista/kth/sics/alice/%d", ++seq_id);
-  printf(" (msg: %s)\n", prefix_buf);
+  PRINTF(" (msg: %s)\n", prefix_buf);
 
   int suite = CCNL_SUITE_NDNTLV;
 //  int suite = CCNL_SUITE_CCNTLV;
@@ -131,10 +131,10 @@ ccnl_generation(void)
   offs = ccnl_cache_content(suite, prefix_buf, content);
 
   if(offs == -1){
-  	printf("failed to make content!\n");
+  	PRINTF("failed to make content!\n");
   }else
   {
-  	printf("content generated!\n");
+  	PRINTF("content generated!\n");
   	fade(LEDS_RED);
   }
 

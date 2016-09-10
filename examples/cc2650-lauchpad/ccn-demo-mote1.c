@@ -86,7 +86,7 @@ tcpip_handler(void)
   if(uip_newdata()) {
     str = uip_appdata;
     str[uip_datalen()] = '\0';
-    printf("Response from the mote2: '%s'\n", str);
+    PRINTF("Response from the mote2: '%s'\n", str);
     fade(LEDS_YELLOW);
   }
 }
@@ -115,11 +115,11 @@ ccnl_generation(void)
   static int seq_id;
   if(seq_id == SEQ_ID_MAX) seq_id=0;
 
-  printf("mote1 sending to: ");
+  PRINTF("mote1 sending to: ");
   PRINT6ADDR(&client_conn->ripaddr);
 //  sprintf(buf, "Hello %d from the client", ++seq_id);
   sprintf(buf, "kista/kth/sics/alice/%d", ++seq_id);
-  printf(" (msg: %s)\n", buf);
+  PRINTF(" (msg: %s)\n", buf);
 #if SEND_TOO_LARGE_PACKET_TO_TEST_FRAGMENTATION
     uip_udp_packet_send(client_conn, buf, UIP_APPDATA_SIZE);
 #else /* SEND_TOO_LARGE_PACKET_TO_TEST_FRAGMENTATION */
@@ -131,7 +131,7 @@ ccnl_generation(void)
 #ifdef CCNL_MAKE_INTEREST
     offs = ccnl_make_interest(suite, buf, NULL,_int_buf, BUF_SIZE, &len);
   	if(offs == -1){
-  		printf("failed to make interest!\n");
+  		PRINTF("failed to make interest!\n");
   		return;
   	}
   	uip_udp_packet_send(client_conn, _int_buf, len/*strlen(_int_buf)*/);
@@ -141,7 +141,7 @@ ccnl_generation(void)
   	char* content="5635\0";
   	offs = ccnl_make_content(suite, buf, content, NULL,_int_buf, &len);
   	if(offs == -1){
-  		printf("failed to make content!\n");
+  		PRINTF("failed to make content!\n");
   	}
   	data = _int_buf + offs;
   	uip_udp_packet_send(client_conn, data, len);
@@ -152,9 +152,9 @@ ccnl_generation(void)
     if(fd_write != -1) {
       n = cfs_write(fd_write, data, len);
       cfs_close(fd_write);
-      printf("successfully appended data to cfs. wrote %i bytes  \n",n);
+      PRINTF("successfully appended data to cfs. wrote %i bytes  \n",n);
     } else {
-      printf("ERROR: could not write to memory.\n");
+      PRINTF("ERROR: could not write to memory.\n");
     }
 #endif
 #else
@@ -164,9 +164,9 @@ ccnl_generation(void)
     if(fd_write != -1) {
       n = cfs_write(fd_write, buf, sizeof(buf));
       cfs_close(fd_write);
-      printf("successfully appended data to cfs. wrote %i bytes  \n",n);
+      PRINTF("successfully appended data to cfs. wrote %i bytes  \n",n);
     } else {
-      printf("ERROR: could not write to memory.\n");
+      PRINTF("ERROR: could not write to memory.\n");
     }
 #endif
 	#endif
