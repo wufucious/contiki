@@ -47,8 +47,8 @@
 /*---------------------------------------------------------------------------*/
 #define UIP_CONF_BUFFER_SIZE 512
 /*---------------------------------------------------------------------------*/
-#define CCNL_MAX_CACHE_ENTRIES 6
-#define SEQ_ID_MAX 6
+#define CCNL_MAX_CACHE_ENTRIES 15
+#define SEQ_ID_MAX 15
 /*---------------------------------------------------------------------------*/
 #define MOTE1_INTERVAL 0.5 * CLOCK_SECOND
 #define MOTE2_INTERVAL 5 * CLOCK_SECOND
