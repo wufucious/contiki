@@ -123,7 +123,7 @@ ccnl_generation(void)
   int suite = CCNL_SUITE_NDNTLV;
 //  int suite = CCNL_SUITE_CCNTLV;
   int len, offs;
-  unsigned char *data;
+//  unsigned char *data;
 
   memset(ccn_content_buf, '\0', CCN_BUF_SIZE);
   char* content="5635\0";
