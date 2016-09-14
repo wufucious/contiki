@@ -39,7 +39,7 @@
 
 #include "contiki.h"
 //#include "ccn-lite-contiki.h"
-
+#include <limits.h>
 #include <stdio.h> /* For printf() */
 /*---------------------------------------------------------------------------*/
 PROCESS(hello_world_process, "Hello world process");
@@ -49,8 +49,40 @@ PROCESS_THREAD(hello_world_process, ev, data)
 {
   PROCESS_BEGIN();
 
-  printf("Hello, world\n");
-  
+  printf("Hello, world\nsizeof(int) is %d\nsizeof(long) is %d\n",sizeof(int),sizeof(long));
+  unsigned long a = ULONG_MAX;
+  int b;
+  printf("The minimum value of INT = %d\n", INT_MIN);
+  printf("The maximum value of INT = %d\n", INT_MAX);
+  printf("The maximum value of ULONG_MAX = %lu\n", ULONG_MAX);
+
+//  if(sizeof(unsigned long) > sizeof(int)){
+//
+//  }else{
+//	  if(a > INT_MAX){
+//		  b = a - INT_MAX-1;
+//	  }else{
+//		  b = a;
+//	  }
+//  }
+
+  b = INT_MAX % ((unsigned long)INT_MAX+1);
+  printf("int b = %d\n",b);
+
+  b = (INT_MAX+1) % ((unsigned long)INT_MAX+1);
+  printf("int b = %d\n",b);
+
+  b = (INT_MAX-1) % ((unsigned long)INT_MAX+1);
+  printf("int b = %d\n",b);
+
+  while(1) {
+	  unsigned long i;
+	  i=clock_seconds();
+	  printf("current second is %lu \n",i);
+	  int j=clock_time();
+	  printf("current clock_time is %d \n",j);
+  }
+
   PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
