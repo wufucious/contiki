@@ -126,9 +126,10 @@ ccnl_generation(void)
 //  unsigned char *data;
 
   memset(ccn_content_buf, '\0', CCN_BUF_SIZE);
-  char* content="5635\0";
+  char* content="a\nb\0c";
+  int conlen = 5;
 
-  offs = ccnl_cache_content(suite, prefix_buf, content);
+  offs = ccnl_cache_content(suite, prefix_buf, content, conlen);
 
   if(offs == -1){
   	PRINTF("failed to make content!\n");
