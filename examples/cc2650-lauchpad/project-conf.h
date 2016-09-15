@@ -36,6 +36,11 @@
 #define RF_CORE_CONF_CHANNEL                 26
 //#define RF_BLE_CONF_ENABLED                   1
 /*---------------------------------------------------------------------------*/
+//configuration for sparrow
+#define NETSTACK_CONF_RDC               nullrdc_driver
+#define SICSLOWPAN_CONF_COMPRESSION_THRESHOLD  0
+#define UIP_CONF_ROUTER 0
+/*---------------------------------------------------------------------------*/
 /* Change to match 6lbr's 6lowpan context */
 //#define UIP_CONF_DS6_DEFAULT_PREFIX 0xaaaa
 /*---------------------------------------------------------------------------*/
