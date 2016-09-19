@@ -54,7 +54,7 @@
 /*---------------------------------------------------------------------------*/
 #define CCNL_MAX_CACHE_ENTRIES 8
 #define SEQ_ID_MAX 8
-#define CCNL_MAX_PIT_ENTRIES 5
+#define CCNL_MAX_PIT_ENTRIES 3
 /*---------------------------------------------------------------------------*/
 #define MOTE1_INTERVAL 0.5 * CLOCK_SECOND
 #define MOTE2_INTERVAL 5 * CLOCK_SECOND
