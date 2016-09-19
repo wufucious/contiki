@@ -122,21 +122,27 @@ ccnl_generation(void)
 
   int suite = CCNL_SUITE_NDNTLV;
 //  int suite = CCNL_SUITE_CCNTLV;
-  int offs;
-//  unsigned char *data;
+  int ret;
+  int len;
 
   memset(ccn_content_buf, '\0', CCN_BUF_SIZE);
   char* content="a\nb\0c";
   int conlen = 5;
 
-  offs = ccnl_cache_content(suite, prefix_buf, content, conlen);
+  ret = ccnl_cache_content(suite, prefix_buf, content, conlen, ccn_content_buf, &len);
 
-  if(offs == -1){
-  	PRINTF("failed to make content!\n");
-  }else
-  {
-  	PRINTF("content generated!\n");
-  	fade(LEDS_RED);
+  if(ret == 0){
+	  PRINTF("content generated!\n");
+	  fade(LEDS_RED);
+  }else if(ret == 1){
+	  PRINTF("content generated! and "
+			  "match a pit interest, sending CO out\n");
+	  uip_udp_packet_send(client_conn, ccn_content_buf, len);
+	  fade(LEDS_RED);
+	  fade(LEDS_GREEN);
+	  fade(LEDS_RED);
+  }else if(ret == -1){
+	  PRINTF("failed to make content!\n");
   }
 
   //data = ccn_content_buf + offs;
@@ -201,6 +207,7 @@ PROCESS_THREAD(ccn_client_process, ev, data)
     PROCESS_YIELD();
     if(etimer_expired(&et)) {
     	ccnl_generation();
+    	my_ccnl_do_ageing();
     	etimer_restart(&et);
     } else if(ev == tcpip_event) {
       tcpip_handler();

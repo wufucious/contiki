@@ -59,6 +59,7 @@
 #define MOTE1_INTERVAL 0.5 * CLOCK_SECOND
 #define MOTE2_INTERVAL 5 * CLOCK_SECOND
 #define MOTE3_INTERVAL 3 * CLOCK_SECOND
+#define MY_CCNL_INTEREST_TIMEOUT MOTE3_INTERVAL * SEQ_ID_MAX
 /*---------------------------------------------------------------------------*/
 #endif /* PROJECT_CONF_H_ */
 /*---------------------------------------------------------------------------*/
