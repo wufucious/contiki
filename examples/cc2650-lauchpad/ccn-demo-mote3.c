@@ -53,7 +53,7 @@ static char prefix_buf[MAX_PREFIX_SIZE];
 static unsigned char ccn_content_buf[CCN_BUF_SIZE];
 
 
-static struct uip_udp_conn *client_conn;
+static struct uip_udp_conn *client_conn, *client_conn_cache;
 
 /*---------------------------------------------------------------------------*/
 PROCESS(ccn_client_process, "ccn client mote2 process");
@@ -106,6 +106,11 @@ tcpip_handler(void)
 
       	memset(&client_conn->ripaddr, 0, sizeof(client_conn->ripaddr));
       	client_conn->rport=0;
+    }else if(k == 1){
+    	PRINTF("cache this udp conn as client_conn_cache");
+    	uip_ipaddr_copy(&client_conn->ripaddr, &UIP_IP_BUF->srcipaddr);
+    	client_conn->rport = UIP_IP_BUF->srcport;
+    	memcpy(client_conn_cache, client_conn, sizeof(struct uip_udp_conn));
     }
   }
 }
@@ -137,10 +142,18 @@ ccnl_generation(void)
   }else if(ret == 1){
 	  PRINTF("content generated! and "
 			  "match a pit interest, sending CO out\n");
-	  uip_udp_packet_send(client_conn, ccn_content_buf, len);
 	  fade(LEDS_RED);
 	  fade(LEDS_GREEN);
 	  fade(LEDS_RED);
+
+//	  uip_ipaddr_copy(&client_conn->ripaddr, &UIP_IP_BUF->srcipaddr);
+//	  client_conn->rport = UIP_IP_BUF->srcport;
+
+//	  uip_udp_packet_send(client_conn, ccn_content_buf, len);
+	  uip_udp_packet_send(client_conn_cache, ccn_content_buf, len);
+
+//	  memset(&client_conn->ripaddr, 0, sizeof(client_conn->ripaddr));
+//	  client_conn->rport=0;
   }else if(ret == -1){
 	  PRINTF("failed to make content!\n");
   }
@@ -194,6 +207,9 @@ PROCESS_THREAD(ccn_client_process, ev, data)
 
   client_conn = udp_new(NULL, UIP_HTONS(0), NULL);
   udp_bind(client_conn, UIP_HTONS(1001));
+
+  client_conn_cache = udp_new(NULL, UIP_HTONS(0), NULL);
+  udp_bind(client_conn_cache, UIP_HTONS(1001));
 
   PRINTF("Waiting for the Interest from IP address ");
   PRINT6ADDR(&client_conn->ripaddr);
