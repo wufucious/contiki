@@ -22,7 +22,7 @@ struct free_memory_block {
 static struct memory_block * first = NULL;
 static struct memory_block * last = NULL;
 static struct free_memory_block * last_free = NULL;
-//static struct free_memory_block * first_free = NULL; //TODO: by me, this can accelerate free block searching
+//static struct free_memory_block * first_free = NULL; //TODO: by me, this can accelerate free block searching, to do later
 
 static const size_t data_offset = sizeof(struct memory_block);
 static const size_t min_size = 2*sizeof(struct free_memory_block *);
@@ -35,7 +35,7 @@ static struct memory_block * new_block(size_t sz) {
 }
 #define next_block(cur) ((struct memory_block *) (((char *) cur) + cur->length))
 
-#define MALLOC_ALIGNMENT       4//(sizeof(struct {char a;}))//use this trick to get MALLOC_ALIGNMENT, but seems not work......
+#define MALLOC_ALIGNMENT       sizeof(size_t)//it is 4 for cm3 cpu
 
 void * heapmem_alloc(size_t n) {
 #ifdef MALLOC_DEBUG
@@ -76,7 +76,7 @@ void * heapmem_alloc(size_t n) {
     if (fcur->prev_free)
 	fcur->prev_free->next_free = NULL;
 	/*ask for more space*/
-	sbrk(data_offset + n - cur->length);	 //TODO:what if new assigned memory not follow former memory?
+	sbrk(data_offset + n - cur->length);
 	cur->occupied = 1;
 	cur->length = data_offset + n;
 	last = cur;
@@ -133,11 +133,9 @@ void merge_blocks(struct free_memory_block * b1, struct free_memory_block * b2) 
 
 void merge_check(struct free_memory_block * block) {
   char merge_prev = (block->prev_free) && (next_block(block->prev_free) == (struct memory_block *) block);
-//  char merge_next = (next_block(block) == (struct memory_block *) block->next_free);
   char merge_next = (next_block(block) == (struct memory_block *) block->next_free)&&(block->next_free);
 
   if (merge_next) {
-//    merge_blocks(block->prev_free, block->next_free);//here is a bug, unable to merge afterwards
     merge_blocks(block, block->next_free);
   }
 #ifdef MALLOC_DEBUG
@@ -238,39 +236,39 @@ void memstats() {
 #endif // NDEBUG
 }
 
-void memconsistency() {
-#ifndef NDEBUG
-  if (first == NULL) return;
-  struct memory_block * cur = first;
-  int saw_free = 0;
-  struct free_memory_block * last_seen = NULL;
-  struct free_memory_block * expect = NULL;
-  char seen_any_free = 0;
-  for (;;) {
-    if (cur->occupied) {
-      saw_free = 0;
-    } else {
-      struct free_memory_block * fcur = (struct free_memory_block *) cur;
-      if (saw_free) {
-	printf("Memory consistency %p: Seen %d free blocks in a row\n", fcur, saw_free);
-      }
-      if (fcur->prev_free != last_seen) {
-	printf("Memory consistency %p: Expected prev_free = %p, got %p\n", fcur, last_seen, fcur->prev_free);
-      }
-      if (seen_any_free && fcur != expect) {
-	printf("Memory consistency %p: Expected %p to be the next free block\n", fcur, expect);
-      }
-      ++saw_free;
-      last_seen = fcur;
-      expect = fcur->next_free;
-      seen_any_free = 1;
-    }
-    if (cur == last) break;
-    cur = next_block(cur);
-  }
-  if (last_seen != last_free) {
-    printf("Memory consistency: Expected %p to be the last free block, got %p\n", last_free, last_seen);
-  }
-#endif // NDEBUG
-}
+// void memconsistency() {
+// #ifndef NDEBUG
+//   if (first == NULL) return;
+//   struct memory_block * cur = first;
+//   int saw_free = 0;
+//   struct free_memory_block * last_seen = NULL;
+//   struct free_memory_block * expect = NULL;
+//   char seen_any_free = 0;
+//   for (;;) {
+//     if (cur->occupied) {
+//       saw_free = 0;
+//     } else {
+//       struct free_memory_block * fcur = (struct free_memory_block *) cur;
+//       if (saw_free) {
+// 	printf("Memory consistency %p: Seen %d free blocks in a row\n", fcur, saw_free);
+//       }
+//       if (fcur->prev_free != last_seen) {
+// 	printf("Memory consistency %p: Expected prev_free = %p, got %p\n", fcur, last_seen, fcur->prev_free);
+//       }
+//       if (seen_any_free && fcur != expect) {
+// 	printf("Memory consistency %p: Expected %p to be the next free block\n", fcur, expect);
+//       }
+//       ++saw_free;
+//       last_seen = fcur;
+//       expect = fcur->next_free;
+//       seen_any_free = 1;
+//     }
+//     if (cur == last) break;
+//     cur = next_block(cur);
+//   }
+//   if (last_seen != last_free) {
+//     printf("Memory consistency: Expected %p to be the last free block, got %p\n", last_free, last_seen);
+//   }
+// #endif // NDEBUG
+// }
 // vim:set sw=2 ts=8 sts=2:
